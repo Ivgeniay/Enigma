@@ -6,7 +6,6 @@ using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour
 {
     private Animator animator;
-    private ObservableVariable<AnimationState> currentAnimationState;
 
     private PlayerController playerController;
     private new Rigidbody rigidbody;
@@ -19,6 +18,9 @@ public class PlayerAnimationController : MonoBehaviour
     private int isInteractiveObject = Animator.StringToHash("IsInteractiveObject");
     private int isSlide = Animator.StringToHash("IsSlide");
     private int isRope = Animator.StringToHash("IsRope");
+    private int isPull = Animator.StringToHash("IsPull");
+    private int isDead = Animator.StringToHash("IsDead");
+    
     private int isClimb = Animator.StringToHash("IsClimb");
 
     private void Awake()
@@ -27,10 +29,17 @@ public class PlayerAnimationController : MonoBehaviour
         playerController = GetComponentInParent<PlayerController>();
 
         animator = GetComponent<Animator>();
-        currentAnimationState = new ObservableVariable<AnimationState>();
-
     }
-    private void Start()
+
+    private void Start() =>
+        Subscribe();
+
+    private void Update() {
+        animator.SetFloat(movingBlendHash, GetPersent(rigidbody.velocity.x, playerController.Speed));
+    }
+
+
+    private void Subscribe()
     {
         playerController.IsGrounded.OnValueChangeEvent += IsGroundedOnValueChangeHandler;
         playerController.IsMoving.OnValueChangeEvent += IsMovingOnValueChangeHandler;
@@ -38,28 +47,24 @@ public class PlayerAnimationController : MonoBehaviour
         playerController.IsInteractiveObject.OnValueChangeEvent += IsInteractiveObjectOnValueChangeHandler;
         playerController.IsSlide.OnValueChangeEvent += IsSlideOnValueChangeHandler;
         playerController.IsRopeTrigger.OnValueChangeEvent += IsRopeTriggerOnValueChangeHandler;
-        playerController.IsClimb.OnValueChangeEvent += IsClimbOnValueChangeHandler; ;
+        playerController.IsClimb.OnValueChangeEvent += IsClimbOnValueChangeHandler;
+        playerController.IsPull.OnValueChangeEvent += IsPullOnValueChangeHandler;
+        playerController.IsDead.OnValueChangeEvent += IsDeadOnValueChangeHandler;
 
         playerController.OnJumpEvent += OnJumpHandler;
-
-        currentAnimationState.OnValueChangeEvent += CurrentAnimationStateOnValueChangeHander;
-
     }
 
-    public void SetAnimation(AnimationState animationState) =>    
-        currentAnimationState.Value = animationState;
 
-    private void Update()
-    {
-        animator.SetFloat(movingBlendHash, GetPersent(rigidbody.velocity.x, playerController.Speed));
-    }
-    
     private float GetPersent(float num, float from) => Mathf.Abs(num/from);
 
 
     #region Event
+    private void IsPullOnValueChangeHandler(bool newValue) =>
+        animator.SetBool(isPull, newValue);
     private void OnJumpHandler() =>
         animator.SetTrigger(jumpHash);
+    private void IsDeadOnValueChangeHandler(bool newValue) =>
+        animator.SetBool(isDead, newValue);
     private void IsSlideOnValueChangeHandler(bool newValue) =>
         animator.SetBool(isSlide, newValue);
     private void IsClimbOnValueChangeHandler(bool newValue) =>
@@ -82,24 +87,6 @@ public class PlayerAnimationController : MonoBehaviour
 
 
 
-}
-public enum AnimationState
-{
-    Idle,
-    JumpUp,
-    SideJump,
-    ClingToHands,
-    PullUp,
-    SquatDown,
-    SquatDownWalk,
-    Dead,
-    Pull,
-    Push,
-    SlideDown,
-    HookShot,
-    HookShot2,
-    OnRope,
-    IceAxeUp
 }
 
 public class ObservableVariable<T>

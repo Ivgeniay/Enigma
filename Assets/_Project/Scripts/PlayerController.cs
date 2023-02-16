@@ -1,3 +1,4 @@
+using Box;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,9 @@ public class PlayerController : MonoBehaviour
     [field: SerializeField] public float Speed { get; private set; } = 1f;
     [field: SerializeField] public float ImpulsRopeUp { get; set; } = 3f;
     [field: SerializeField] private float ImpulsRopeUpSlowdown { get; set; } = 0.03f;
-    [field: SerializeField] public float JumpForce { get; private set; } = 1f;
+    [field: SerializeField] public float JumpForce { get; set; } = 1f;
+    [field: SerializeField] private float pullForce { get; set; } = 1f;
+    [field: SerializeField] private float deathImpulse { get; set; } = 6f;
 
     [SerializeField] private LayerMask groudLayerMask;
 
@@ -28,9 +31,14 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rigidbody;
     private float speed;
 
+    private IInteractive currentInteractiveObj;
+
     private bool isRope;
     private bool isClimb;
 
+    public ObservableVariable<bool> IsWall { get; private set; }
+    public ObservableVariable<bool> IsDead { get; private set; }
+    public ObservableVariable<bool> IsPull { get; private set; }
     public ObservableVariable<bool> IsClimb { get; private set; }
     public ObservableVariable<bool> IsSlide { get; private set; }
     public ObservableVariable<bool> IsMoving { get; private set; }
@@ -50,35 +58,102 @@ public class PlayerController : MonoBehaviour
         IsInteractiveObject = new ObservableVariable<bool>();
         IsSlide = new ObservableVariable<bool>();
         IsRopeTrigger = new ObservableVariable<bool>();
+        IsWall = new ObservableVariable<bool>();
+        IsPull = new ObservableVariable<bool>();
+        IsDead = new ObservableVariable<bool>();
+
         IsClimb = new ObservableVariable<bool>();
 
         capsuleHeight = collider.height;
         capsuleRadius = collider.radius;
         capsuleYOffset = collider.center.y;
 
-        IsClimb.OnValueChangeEvent += IsClimbOnValueChangeHandler;
         IsRopeTrigger.OnValueChangeEvent += IsRopeTriggerOnValueChangeHandler;
+    }
+    private void Update() {
+        if (IsDead.Value) return;
 
-        ropeKnots = rope.GetComponentsInChildren<Transform>().ToList();
+        IsGrounded.Value = CheckGround();
+        IsWall.Value = CheckWall();
+
+        if (IsRopeTrigger.Value) {
+            var distance = Vector3.Distance(transform.position, currentRopeKnot.position);
+            if (distance > 0.2) {
+
+                //transform.position = Vector3.MoveTowards(
+                transform.position = Vector3.Lerp(
+                    transform.position,
+                    new Vector3(currentRopeKnot.position.x, currentRopeKnot.position.y, 0),
+                    Time.deltaTime * ImpulsRopeUp);
+
+                ImpulsRopeUp -= ImpulsRopeUpSlowdown;
+            }
+            else {
+                currentRopeKnot = GetNextKnot(ropeKnots, currentRopeKnot);
+            }
+        }
+
+        //if (isClimb && IsMoving.Value && !IsGrounded.Value) IsClimb.Value = true;
+        //else IsClimb.Value = false;
+
+        if (rigidbody.useGravity != true) return;
+
+        if (rigidbody.velocity.y < -0.5 && IsGrounded.Value && !IsMoving.Value) IsSlide.Value = true;
+        else IsSlide.Value = false;
     }
 
-    public void Move(Vector2 vectorMove) {
 
-        if (vectorMove.x != 0)
-            IsMoving.Value = true;
+
+    public void IsUpButtonDown(bool button) {
+        if (button && isRope) IsRopeTrigger.Value = true;
+        else IsRopeTrigger.Value = false;
+    }
+    public void IsInteractiveButton(bool button) {
+        if (button && IsInteractiveObject.Value) IsPull.Value = true;
+        else IsPull.Value = false;
+    }
+
+
+
+    #region Move
+    public void Move(Vector2 vectorMove) {
+        if (IsDead.Value) return;
+
+        if (vectorMove.x != 0) IsMoving.Value = true;
         else IsMoving.Value = false;
 
         PlayerRotation(vectorMove);
-        
+
+        if (currentInteractiveObj is ICapableMoving capable) {
+            if (IsPull.Value) {
+                Pull(capable, vectorMove);
+                return;
+            }
+        }
         float horizontal =  vectorMove.x * speed;
-        rigidbody.velocity = new Vector2(horizontal, rigidbody.velocity.y);
+        rigidbody.velocity = new Vector3(horizontal, rigidbody.velocity.y, 0);
     }
     public void Jump() {
         if (IsGrounded.Value) {
             OnJumpEvent.Invoke();
         }
     }
+    private void PlayerRotation(Vector2 vector) {
+        if (IsSlide.Value) {
+            transform.rotation = Quaternion.identity;
+            return;
+        }
 
+        if (IsPull.Value) return;
+
+        if (vector.x > 0)
+            transform.rotation = Quaternion.identity;
+        else if (vector.x < 0)
+            transform.rotation = Quaternion.Euler(new Vector2(0, -180));
+    }
+    #endregion
+
+    #region SquatDown
     public void SquatDown(bool isButtonPressed) {
         if (isButtonPressed) {
             collider.height = capsuleHeight /2;
@@ -96,19 +171,34 @@ public class PlayerController : MonoBehaviour
         }
         IsSquitDown.Value = isButtonPressed;
     }
-    public void CollisionInteractiveObject(bool isCollision) =>
-        IsInteractiveObject.Value = isCollision;
+    #endregion
 
-    public void IsRope(bool rope) =>
-        isRope = rope;
-    public void IsUpButtonDown(bool button) {
-        if (button && isRope) IsRopeTrigger.Value = true;
-        else IsRopeTrigger.Value = false;
+    #region Pull/Push
+    public void CollisionInteractiveObject(bool isCollision, IInteractive interactiveGo) {
+        rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
+        IsInteractiveObject.Value = isCollision;
+        currentInteractiveObj = interactiveGo;
     }
 
+    private void Pull(ICapableMoving capableMoving, Vector2 vectorMove) {
+        capableMoving.Move(vectorMove * pullForce);
+    }
+
+    #endregion
+
+    #region Climb
     public void IsClimbTrigger(bool value) =>
         isClimb = value;
 
+    #endregion
+
+    #region Rope
+    public void SetRope(Transform rope) {
+        this.rope = rope;
+        ropeKnots = rope.GetComponentsInChildren<Transform>().ToList();
+    }
+    public void IsRope(bool rope) =>
+        isRope = rope;
     private void IsRopeTriggerOnValueChangeHandler(bool value) {
         if (value == true) {
             rigidbody.useGravity = false;
@@ -120,7 +210,6 @@ public class PlayerController : MonoBehaviour
             rigidbody.useGravity = true;
         }
     }
-
     private Transform GetNearlestKnotTransform(List<Transform> transformKnotList) {
         List<float> distances = new();
         foreach (Transform t in transformKnotList)
@@ -135,64 +224,41 @@ public class PlayerController : MonoBehaviour
         if (index == 0) return currentKnotTransform;
         return transformKnotList[index - 1];
     }
+    #endregion
 
-    private void Update() {
-        IsGrounded.Value = GroundMask();
-
-        //Ray ray = new Ray(  new Vector3(transform.position.x, transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z),
-        //                    new Vector3(transform.forward.z, 0, 0));
-        //RaycastHit hit;
-        //if(Physics.Raycast(ray, out hit))
-        //{
-        //    if (hit.normal.x > -1)
-        //        Debug.Log(hit.normal);
-        //}
-        //Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z),
-        //    new Vector3(transform.forward.z, 0, 0), Color.green, 10);
-
-
-        if (IsRopeTrigger.Value) {
-            var distance = Vector3.Distance(transform.position, currentRopeKnot.position);
-            if (distance > 0.2) {
-                transform.position = Vector3.Lerp(transform.position, currentRopeKnot.position, Time.deltaTime * ImpulsRopeUp);
-                ImpulsRopeUp -= ImpulsRopeUpSlowdown;
-            }
-            else {
-                currentRopeKnot = GetNextKnot(ropeKnots, currentRopeKnot);
-            }
-        }
-
-        if (isClimb && IsMoving.Value && !IsGrounded.Value) {
-            IsClimb.Value= true;
-        } else IsClimb.Value = false;
-
-        if (rigidbody.useGravity != true) return;
-        if (rigidbody.velocity.y < - 0.1 && IsGrounded.Value)
-            IsSlide.Value = true;
-        else 
-            IsSlide.Value = false;
-    }
-
-    private bool GroundMask() {
+    #region Cheking
+    private bool CheckGround() {
         var bottomCenterPoint = new Vector3(collider.bounds.center.x, collider.bounds.min.y, collider.bounds.center.z);
         return Physics.CheckCapsule(collider.bounds.center, bottomCenterPoint, collider.bounds.size.x / 2 * 0.9f, groudLayerMask);
     }
-
-    private void PlayerRotation(Vector2 vector)
+    private bool CheckWall()
     {
-        if (IsSlide.Value) {
-            transform.rotation = Quaternion.identity;
-            return;
+        Ray ray = new Ray(
+            new Vector3(transform.position.x, transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z),
+            new Vector3(transform.forward.z, 0, 0)
+            );
+
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit)) {
+            if (Mathf.Abs(hit.normal.x) == 1)
+                return true; 
         }
 
-        if (vector.x > 0)
-            transform.rotation = Quaternion.identity;
-        else if (vector.x < 0)
-            transform.rotation = Quaternion.Euler(new Vector2(0, -180));
-    }
+        Debug.DrawRay(
+            new Vector3(transform.position.x, transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z),
+            new Vector3(transform.forward.z, 0, 0), 
+            Color.green, 10);
 
-    private void IsClimbOnValueChangeHandler(bool obj) {
-        
+        return false;
+    }
+    #endregion
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.impulse);
+        if (collision.impulse.y > deathImpulse)
+            IsDead.Value= true;
     }
 
 }
