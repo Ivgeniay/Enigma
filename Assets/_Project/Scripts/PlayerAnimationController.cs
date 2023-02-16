@@ -9,7 +9,7 @@ public class PlayerAnimationController : MonoBehaviour
     private ObservableVariable<AnimationState> currentAnimationState;
 
     private PlayerController playerController;
-    private new Rigidbody2D rigidbody2D;
+    private new Rigidbody rigidbody;
 
     private int isGroundedHash = Animator.StringToHash("isGrounded");
     private int isMovingHash = Animator.StringToHash("isMoving");
@@ -18,32 +18,40 @@ public class PlayerAnimationController : MonoBehaviour
     private int isSquatDownHash = Animator.StringToHash("isSquatDown");
     private int isInteractiveObject = Animator.StringToHash("IsInteractiveObject");
     private int isSlide = Animator.StringToHash("IsSlide");
+    private int isRope = Animator.StringToHash("IsRope");
+    private int isClimb = Animator.StringToHash("IsClimb");
 
     private void Awake()
     {
-        rigidbody2D = GetComponentInParent<Rigidbody2D>();
+        rigidbody = GetComponentInParent<Rigidbody>();
         playerController = GetComponentInParent<PlayerController>();
 
         animator = GetComponent<Animator>();
         currentAnimationState = new ObservableVariable<AnimationState>();
 
+    }
+    private void Start()
+    {
         playerController.IsGrounded.OnValueChangeEvent += IsGroundedOnValueChangeHandler;
         playerController.IsMoving.OnValueChangeEvent += IsMovingOnValueChangeHandler;
         playerController.IsSquitDown.OnValueChangeEvent += IsSquitDownOnValueChangeHandler;
         playerController.IsInteractiveObject.OnValueChangeEvent += IsInteractiveObjectOnValueChangeHandler;
         playerController.IsSlide.OnValueChangeEvent += IsSlideOnValueChangeHandler;
+        playerController.IsRopeTrigger.OnValueChangeEvent += IsRopeTriggerOnValueChangeHandler;
+        playerController.IsClimb.OnValueChangeEvent += IsClimbOnValueChangeHandler; ;
+
         playerController.OnJumpEvent += OnJumpHandler;
 
         currentAnimationState.OnValueChangeEvent += CurrentAnimationStateOnValueChangeHander;
-    }
 
+    }
 
     public void SetAnimation(AnimationState animationState) =>    
         currentAnimationState.Value = animationState;
 
     private void Update()
     {
-        animator.SetFloat(movingBlendHash, GetPersent(rigidbody2D.velocity.x, playerController.Speed));
+        animator.SetFloat(movingBlendHash, GetPersent(rigidbody.velocity.x, playerController.Speed));
     }
     
     private float GetPersent(float num, float from) => Mathf.Abs(num/from);
@@ -54,22 +62,26 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetTrigger(jumpHash);
     private void IsSlideOnValueChangeHandler(bool newValue) =>
         animator.SetBool(isSlide, newValue);
+    private void IsClimbOnValueChangeHandler(bool newValue) =>
+        animator.SetBool(isClimb, newValue);
     private void IsMovingOnValueChangeHandler(bool newValue) =>
         animator.SetBool(isMovingHash, newValue);
     private void IsGroundedOnValueChangeHandler(bool newValue) =>    
         animator.SetBool(isGroundedHash, newValue);
     private void IsSquitDownOnValueChangeHandler(bool newValue) =>
         animator.SetBool(isSquatDownHash, newValue);
+    private void IsRopeTriggerOnValueChangeHandler(bool newValue) =>
+        animator.SetBool(isRope, newValue);
     private void IsInteractiveObjectOnValueChangeHandler(bool newValue) =>
-    animator.SetBool(isInteractiveObject, newValue);
+        animator.SetBool(isInteractiveObject, newValue);
     private void CurrentAnimationStateOnValueChangeHander(AnimationState newValue) =>
         Debug.Log(newValue);
-    
+
     #endregion
 
 
 
-    
+
 }
 public enum AnimationState
 {
@@ -101,8 +113,9 @@ public class ObservableVariable<T>
         set
         {
             var oldValue = _value;
+            if (!_value.Equals(value))
+                OnValueChangeEvent?.Invoke(value);
             _value = value;
-            OnValueChangeEvent?.Invoke(value);
         }
     }
 }

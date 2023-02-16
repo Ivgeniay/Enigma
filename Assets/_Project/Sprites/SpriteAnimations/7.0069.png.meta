@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3b3059f9c1ce57444baee07e748339a0
+guid: f9195afd5ffcb984da49dfc9a2f74ab6
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -38,7 +38,7 @@ TextureImporter:
     mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: 1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50

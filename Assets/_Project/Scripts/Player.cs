@@ -21,9 +21,10 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space)) 
             plyaerController.Jump();
+        plyaerController.IsUpButtonDown(Input.GetKey(KeyCode.W));
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) {
+    private void OnCollisionEnter(Collision collision) {
         var interactiveObj = collision.gameObject.GetComponent<ICapableMoving>();
         if (interactiveObj is not null)
         {
@@ -33,10 +34,12 @@ public class Player : MonoBehaviour
                 plyaerController.CollisionInteractiveObject(true);
         }
     }
-    private void OnCollisionExit2D(Collision2D collision) {
+    private void OnCollisionExit(Collision collision) {
         var interactiveObj = collision.gameObject.GetComponent<ICapableMoving>();
         if (interactiveObj is not null)
+        {
             plyaerController.CollisionInteractiveObject(false);
+        }
     }
     
 }
