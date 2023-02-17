@@ -1,48 +1,83 @@
-using Box;
+using System;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class Player : MonoBehaviour
 {
-    private PlayerController plyaerController;
-    
+    [field: SerializeField] private float deathImpulse { get; set; } = 6f;
+
+    private PlayerController playerController;
+    private PlayerSound playerSound;
+
+    private bool isDead;
+    public bool isPickax { get; private set; }
+
     private void Awake()
     {
-        plyaerController = GetComponent<PlayerController>();
+        playerController = GetComponent<PlayerController>();
+        playerSound = GetComponent<PlayerSound>();
     }
 
     void Update()
     {
-        Vector2 moveVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        plyaerController.Move(moveVector);
+        if (isDead) return;
 
-        if (Input.GetKeyDown(KeyCode.Space)) plyaerController.Jump();
+        Vector2 moveVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        playerController.Move(moveVector);
+        playerSound.Move(moveVector);
+
+        if (Input.GetKeyDown(KeyCode.Space)) playerController.Jump();
 
         var squatDown = Input.GetKey(KeyCode.LeftControl);
         if (squatDown is false) squatDown= Input.GetKey(KeyCode.S);
-        plyaerController.SquatDown(squatDown);
+        playerController.SquatDown(squatDown);
 
 
-        plyaerController.IsInteractiveButton(Input.GetKey(KeyCode.E));
-        plyaerController.IsUpButtonDown(Input.GetKey(KeyCode.W));
+        playerController.IsInteractiveButton(Input.GetKey(KeyCode.E));
+        playerController.IsUpButtonDown(Input.GetKey(KeyCode.W));
     }
 
     private void OnCollisionEnter(Collision collision) {
-        var interactiveObj = collision.gameObject.GetComponent<IInteractive>();
-        if (interactiveObj is not null)
+        if (playerController is not null)
         {
-            Vector2 normal = collision.contacts[0].normal;
-            float dot = Vector2.Dot(normal, new Vector2(-transform.forward.z, 0));
-            if (dot > 0.7) {
-                plyaerController.CollisionInteractiveObject(true, interactiveObj);
+            var interactiveObj = collision.gameObject.GetComponent<IInteractive>();
+            if (interactiveObj is not null)
+            {
+                Vector2 normal = collision.contacts[0].normal;
+                float dot = Vector2.Dot(normal, new Vector2(-transform.forward.z, 0));
+                if (dot > 0.7) {
+                    playerController.CollisionInteractiveObject(true, interactiveObj);
+                }
+            }
+
+            if (collision.impulse.y > 1) {
+                var level = Mathf.Clamp(collision.impulse.y, 0f, 10);
+                level = Mathf.InverseLerp(0, 10, level);
+                playerSound.Landing(level);
+            }
+
+            if (collision.impulse.y > deathImpulse) {
+                isDead = true;
+                playerController.Dead();
+                playerController = null;
             }
         }
     }
-    private void OnCollisionExit(Collision collision) {
-        var interactiveObj = collision.gameObject.GetComponent<IInteractive>();
-        if (interactiveObj is not null) {
-            plyaerController.CollisionInteractiveObject(false, interactiveObj);
+
+    private void OnCollisionStay(Collision collision) {
+        if (playerController is not null) {
+            var _normal = collision.contacts[0].normal;
+            if (_normal.y <= 0.1) _normal = new Vector3(_normal.x, 0.2f, _normal.z);
+            if (_normal.y >= 1) _normal = new Vector3(_normal.x, 1f, _normal.z);
+            playerController.SetNormal(_normal);
         }
     }
-    
+
+    private void OnCollisionExit(Collision collision) {
+        if (playerController is not null) {
+            playerController.CollisionInteractiveObject(false, null);
+        }
+    }
+
+    public void PickPickax() =>
+        isPickax= true;
 }
