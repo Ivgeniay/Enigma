@@ -300,6 +300,7 @@ MonoBehaviour:
   maxPosX: 0
   minPosY: 0
   maxPosY: 0
+  offset: {x: 0, y: 0.5, z: 0}
   timeToFade: 1
   spriteRenderer: {fileID: 859823513198190825}
   objectToRemove: {fileID: 3454263519549689409}

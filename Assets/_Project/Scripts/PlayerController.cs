@@ -429,7 +429,7 @@ public class PlayerController : MonoBehaviour
     #region BrakeByPickax
     private void CheckBreakByPickax(Vector2 move)
     {
-        if (player.isPickax == false) return;
+        if (Player.isPickax == false) return;
 
         var transformDirection = transform.forward.z;
         var moveNornalize = move.normalized.x;

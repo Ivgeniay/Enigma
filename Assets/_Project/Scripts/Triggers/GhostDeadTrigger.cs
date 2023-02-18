@@ -2,11 +2,21 @@
 
 public class GhostDeadTrigger : MonoBehaviour
 {
+    private Ghost ghost;
+    private bool isActive = true;
+
+    public void SetGhost(Ghost ghost) => 
+        this.ghost = ghost;
+
     private void OnTriggerEnter(Collider other) {
-        var ghost = other.GetComponent<Ghost>();
-        if (ghost) {
-            ghost.Died();
+        var player = other.GetComponent<Player>();
+        if (player && isActive) {
+            if (ghost != null) {
+                isActive = false;
+                ghost.Died();
+            }
         }
+        
     }
 
 }

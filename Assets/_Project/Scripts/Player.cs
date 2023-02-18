@@ -12,7 +12,8 @@ public class Player : MonoBehaviour
     private PlayerSound playerSound;
 
     private bool isDead;
-    public bool isPickax { get; private set; }
+    public static bool isPickax { get; private set; }
+    public static bool isNecllace { get; private set; }
 
     private void Awake() {
         Reloaded.Instance.Instantiate(this);
@@ -83,6 +84,9 @@ public class Player : MonoBehaviour
     public void PickPickax() =>
         isPickax= true;
 
+    public void PickNecllace() =>
+        isNecllace = true;
+
     public void Dead()
     {
         isDead = true;
@@ -90,4 +94,5 @@ public class Player : MonoBehaviour
         playerController = null;
         OnPlayerDeadEvent?.Invoke();
     }
+
 }

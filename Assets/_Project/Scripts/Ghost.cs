@@ -11,6 +11,8 @@ public class Ghost : MonoBehaviour
     [SerializeField] private float minPosY;
     [SerializeField] private float maxPosY;
 
+    [SerializeField] private Vector3 offset;
+
     #region Ghost die
 
     [Header("----- Ghost Die -----")]
@@ -48,7 +50,7 @@ public class Ghost : MonoBehaviour
             else
                 transform.rotation = Quaternion.Euler(new Vector2(0, -180));
 
-            transform.position = Vector3.Lerp(transform.position, player.position, speed * Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, player.position + offset, speed * Time.deltaTime);
 
             transform.position = new Vector3(
                 Mathf.Clamp(transform.position.x, minPosX, maxPosX),
