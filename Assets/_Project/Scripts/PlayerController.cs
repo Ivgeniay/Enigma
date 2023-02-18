@@ -15,8 +15,28 @@ public class PlayerController : MonoBehaviour
     [field: SerializeField] private float pullForce { get; set; } = 1f;
     [field: SerializeField] private Vector3 normal { get; set; }
     [SerializeField] private LayerMask groudLayerMask;
+    
+    [SerializeField] private float wallCheckDistance = 0.9f;
+
+    #region Ledge Settings
+    [Header("--------Ledge settings--------")]
+    [SerializeField] private Transform ledgeClimbCheckOrigin;
+    [SerializeField] private Transform ledgeClimbPosition;
+    [SerializeField] private Vector2 ledgePosition1Offset;
+    [SerializeField] private Vector2 ledgePosition2Offset;
+    
+    private bool isTouchingLedge;
+    private bool isLedgeDetected;
+    public ObservableVariable<bool> canClimbLedge { get; private set; }
+    
+    private Vector3 ledgePositionBottom;
+    private Vector3 ledgePosition1;
+    private Vector3 ledgePosition2;
+    #endregion
+
 
     private Player player;
+    private bool isFacingRight;
 
     private float impulsRopeUp;
 
@@ -28,6 +48,7 @@ public class PlayerController : MonoBehaviour
     private Transform rope;
     private List<Transform> ropeKnots;
     private Transform currentRopeKnot;
+    private bool isOnRope;
 
     private PhysicMaterial physicMaterial;
     private float dynamicFriction;
@@ -74,6 +95,7 @@ public class PlayerController : MonoBehaviour
         IsPush = new ObservableVariable<bool>();
         IsDead = new ObservableVariable<bool>();
         IsBrakePickax = new ObservableVariable<bool>();
+        canClimbLedge = new ObservableVariable<bool>();
 
         IsClimb = new ObservableVariable<bool>();
 
@@ -92,8 +114,29 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Update() {
+        if (!isOnRope)
+        {
+            if (canClimbLedge.Value)
+            {
+                rigidbody.useGravity = false;
+                rigidbody.velocity = Vector3.zero;
+                return;
+            }
+            else
+            {
+                rigidbody.useGravity = true;
+            } 
+        }
+        
         IsGrounded.Value = CheckGround();
         IsWall.Value = CheckWall();
+
+        if (!IsGrounded.Value)
+        {
+            CheckLedgeClimb();
+            
+        }
+
 
         if (IsRopeTrigger.Value) {
             var distance = Vector3.Distance(transform.position, currentRopeKnot.position);
@@ -148,12 +191,11 @@ public class PlayerController : MonoBehaviour
 
     #region Move
     public void Move(Vector2 vectorMove) {
-
         if (vectorMove.x != 0) IsMoving.Value = true;
         else IsMoving.Value = false;
 
         CheckBreakByPickax(vectorMove);
-
+        
         if (CurrentInteractiveObj is ICapableMoving capable && vectorMove != Vector2.zero && canInteractiveObject) {
             MoveObject(capable, vectorMove);
             return;
@@ -162,7 +204,7 @@ public class PlayerController : MonoBehaviour
             IsPull.Value = false;
             IsPush.Value = false;
         }
-
+        
         PlayerRotation(vectorMove);
         float horizontal = vectorMove.x * speed * normal.y;
         rigidbody.velocity = new Vector3(horizontal, rigidbody.velocity.y, 0);
@@ -180,10 +222,15 @@ public class PlayerController : MonoBehaviour
 
         if (IsPull.Value) return;
 
-        if (vector.x > 0)
+        if (vector.x > 0){
+            isFacingRight = true;
             transform.rotation = Quaternion.identity;
+        } 
         else if (vector.x < 0)
+        {
+            isFacingRight = false;
             transform.rotation = Quaternion.Euler(new Vector2(0, -180));
+        }
     }
 
     #endregion
@@ -255,11 +302,13 @@ public class PlayerController : MonoBehaviour
         isRope = rope;
     private void IsRopeTriggerOnValueChangeHandler(bool value) {
         if (value == true) {
+            isOnRope = true;
             rigidbody.useGravity = false;
             rigidbody.velocity = Vector3.zero;
             currentRopeKnot = GetNearlestKnotTransform(ropeKnots);
         }
         if (value == false) {
+            isOnRope = false;
             currentRopeKnot = null;
             rigidbody.useGravity = true;
         }
@@ -299,21 +348,66 @@ public class PlayerController : MonoBehaviour
             );
     }
 
-    private bool CheckWall()
+    private bool CheckWall(Vector3 origin)
     {
         Ray ray = new Ray(
-            new Vector3(transform.position.x, transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z),
+            origin,
             new Vector3(transform.forward.z, 0, 0)
-            );
+        );
 
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit)) {
-            if (hit.distance < 0.9f)
+        if (Physics.Raycast(ray, out hit, wallCheckDistance, groudLayerMask)) {
+            if (hit.distance < wallCheckDistance)
                 if (Mathf.Abs(hit.normal.x) == 1)
                     return true; 
         }
 
         return false;
+    }
+
+    private bool CheckWall()
+    {
+        return CheckWall(new Vector3(transform.position.x,
+            transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z));
+    }
+
+    private void CheckLedgeClimb()
+    {
+        isTouchingLedge = CheckWall(ledgeClimbCheckOrigin.position);
+        if (IsWall.Value && !isTouchingLedge && !isLedgeDetected)
+        {
+            isLedgeDetected = true;
+            ledgePositionBottom = ledgeClimbPosition.position;
+        }
+        
+        if (isLedgeDetected && !canClimbLedge.Value)
+        {
+            canClimbLedge.Value = true;
+
+            if (isFacingRight)
+            {
+                ledgePosition1 =
+                    new Vector3(ledgePositionBottom.x + wallCheckDistance - ledgePosition1Offset.x,
+                        ledgePositionBottom.y + ledgePosition1Offset.y, ledgePositionBottom.z);
+                ledgePosition2 =
+                    new Vector3(ledgePositionBottom.x + wallCheckDistance + ledgePosition2Offset.x,
+                        ledgePositionBottom.y + ledgePosition2Offset.y, ledgePositionBottom.z);
+            }
+            else
+            {
+                ledgePosition1 =
+                    new Vector3(ledgePositionBottom.x - wallCheckDistance + ledgePosition1Offset.x,
+                        ledgePositionBottom.y + ledgePosition1Offset.y, ledgePositionBottom.z);
+                ledgePosition2 =
+                    new Vector3(ledgePositionBottom.x - wallCheckDistance - ledgePosition2Offset.x,
+                        ledgePositionBottom.y + ledgePosition2Offset.y, ledgePositionBottom.z);
+            }
+        }
+
+        if (canClimbLedge.Value)
+        {
+            transform.position = ledgePosition1;
+        }
     }
     #endregion
 
@@ -359,5 +453,27 @@ public class PlayerController : MonoBehaviour
         this.normal = normal;
     }   
 
+    // Animation triggers
+    public void FinishLedgeClimb() {
+        canClimbLedge.Value = false;
+        isLedgeDetected = false;
+        isTouchingLedge = false;
+        transform.position = ledgePosition2;
+    }
 
+    // private void OnDrawGizmos()
+    // {
+    //     Gizmos.color = Color.red;
+    //     Gizmos.DrawRay(ledgeClimbCheckOrigin.position, new Vector3(transform.forward.z, 0, 0) * wallCheckDistance);
+    //     Gizmos.DrawRay(new Vector3(transform.position.x,
+    //         transform.position.y + (collider.height - collider.radius) * transform.localScale.y, transform.position.z), new Vector3(transform.forward.z, 0, 0) * wallCheckDistance);
+    //     if(ledgePosition1 != Vector3.zero)
+    //         Gizmos.color = Color.green;
+    //         Gizmos.DrawSphere(ledgePosition1, 0.1f);
+    //     
+    //     if(ledgePosition2 != Vector3.zero)
+    //         Gizmos.color = Color.blue;
+    //         Gizmos.DrawSphere(ledgePosition2, 0.1f);
+    //     
+    // }
 }
