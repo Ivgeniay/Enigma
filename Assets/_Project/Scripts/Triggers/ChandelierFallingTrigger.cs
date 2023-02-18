@@ -4,7 +4,7 @@ using UnityEngine;
 public class ChandelierFallingTrigger : MonoBehaviour
 {
     [SerializeField] private Rigidbody chandelierRigitbody;
-    [SerializeField] private bool isActive;
+    public bool isActive;
 
     private void OnTriggerEnter(Collider other)
     {
