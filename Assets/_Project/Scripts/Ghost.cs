@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Ghost : MonoBehaviour
 {
@@ -10,13 +11,14 @@ public class Ghost : MonoBehaviour
     [SerializeField] private float minPosY;
     [SerializeField] private float maxPosY;
 
-    private void Start()
-    {
+    private bool isDied = false;
+
+    private void Start() {
         player = FindObjectOfType<Player>().GetComponent<Transform>();
     }
 
     private void Update() {
-        if (player) {
+        if (player & !isDied) {
             if (transform.position.x > player.position.x)
                 transform.rotation = Quaternion.identity;
             else
@@ -38,4 +40,9 @@ public class Ghost : MonoBehaviour
         this.maxPosY = maxPosY;
         this.minPosY = minPosY;
     }
+
+    public void Died() { 
+        isDied = true;
+    }    
+    
 }
