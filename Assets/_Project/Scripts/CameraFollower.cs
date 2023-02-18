@@ -1,28 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class CameraFollower : MonoBehaviour
 {
     [SerializeField] private Transform player;
     [SerializeField] private float Speed;
-    [Range(0, 10)]
-    [SerializeField] private float maxRange;
 
-    void Start()
-    {
-        
+    [SerializeField] private Vector2 offset;
+
+    [SerializeField] private float minPosX;
+    [SerializeField] private float maxPosX;
+    [SerializeField] private float minPosY;
+    [SerializeField] private float maxPosY;
+
+    public void SetOffset(Vector3 offset) =>    
+        this.offset = offset;
+    
+
+    private void Awake() {
+        if (player == null)
+            player = FindObjectOfType<Player>().GetComponent<Transform>();
     }
 
-    // Update is called once per frame
     void LateUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, player.position, Time.deltaTime * Speed);
-
+        transform.position = Vector3.Lerp(transform.position, player.position + new Vector3(offset.x, offset.y, 0), Time.deltaTime * Speed);
         transform.position = new Vector3(
-            Mathf.Clamp(transform.position.x, transform.position.x - maxRange, player.position.x + maxRange),
-            Mathf.Clamp(transform.position.y, transform.position.y - maxRange, player.position.y + maxRange),
-            Mathf.Clamp(transform.position.y, transform.position.z - maxRange, player.position.z + maxRange)
+            Mathf.Clamp(transform.position.x, minPosX, maxPosX),
+            Mathf.Clamp(transform.position.y, minPosY, maxPosY),
+            transform.position.z
             );
     }
     

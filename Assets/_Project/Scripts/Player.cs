@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
+    public event Action OnPlayerDeadEvent;
     [field: SerializeField] private float deathImpulse { get; set; } = 6f;
 
     private PlayerController playerController;
@@ -11,11 +14,12 @@ public class Player : MonoBehaviour
     private bool isDead;
     public bool isPickax { get; private set; }
 
-    private void Awake()
-    {
+    private void Awake() {
+        Reloaded.Instance.Instantiate(this);
         playerController = GetComponent<PlayerController>();
         playerSound = GetComponent<PlayerSound>();
     }
+
 
     void Update()
     {
@@ -56,9 +60,7 @@ public class Player : MonoBehaviour
             }
 
             if (collision.impulse.y > deathImpulse) {
-                isDead = true;
-                playerController.Dead();
-                playerController = null;
+                Dead();
             }
         }
     }
@@ -80,4 +82,12 @@ public class Player : MonoBehaviour
 
     public void PickPickax() =>
         isPickax= true;
+
+    public void Dead()
+    {
+        isDead = true;
+        playerController.Dead();
+        playerController = null;
+        OnPlayerDeadEvent?.Invoke();
+    }
 }
