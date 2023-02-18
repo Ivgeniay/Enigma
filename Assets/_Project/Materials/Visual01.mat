@@ -7,14 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Visual
+  m_Name: Visual01
   m_Shader: {fileID: 4800000, guid: a36b7719ff0465b42ab1407d67672c5f, type: 3}
-  m_ValidKeywords:
-  - DISTORT_ON
-  - FADE_ON
-  - OUTBASEPIXELPERF_ON
-  - OUTBASE_ON
-  - OUTDIST_ON
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -105,7 +100,7 @@ Material:
     - _ColorSwapRedLuminosity: 0.5
     - _Contrast: 1
     - _CullingOption: 0
-    - _DistortAmount: 0.18
+    - _DistortAmount: 0.16
     - _DistortTexXSpeed: 2
     - _DistortTexYSpeed: 2
     - _EditorDrawers: 6
@@ -122,7 +117,7 @@ Material:
     - _GhostTransparency: 0
     - _GlitchAmount: 0.7
     - _GlitchSize: 0.43
-    - _Glow: 34
+    - _Glow: 10
     - _GlowGlobal: 1
     - _GradBlend: 1
     - _GradBoostX: 1.2
@@ -166,14 +161,14 @@ Material:
     - _OnlyInnerOutline: 0
     - _OnlyOutline: 0
     - _OutlineAlpha: 1
-    - _OutlineDistortAmount: 0.48
+    - _OutlineDistortAmount: 0.4
     - _OutlineDistortTexXSpeed: 1.6
     - _OutlineDistortTexYSpeed: 2.2
-    - _OutlineGlow: 1.5
-    - _OutlinePixelWidth: 7.07
+    - _OutlineGlow: 1.19
+    - _OutlinePixelWidth: 25.17
     - _OutlineTexXSpeed: 10
     - _OutlineTexYSpeed: 0
-    - _OutlineWidth: 0.004
+    - _OutlineWidth: 0.067
     - _OverlayBlend: 1
     - _OverlayGlow: 1
     - _PinchUvAmount: 0.35
@@ -223,7 +218,7 @@ Material:
     - _ColorSwapGreen: {r: 1, g: 1, b: 1, a: 1}
     - _ColorSwapRed: {r: 1, g: 1, b: 1, a: 1}
     - _FadeBurnColor: {r: 1, g: 1, b: 0, a: 1}
-    - _GlowColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
+    - _GlowColor: {r: 1, g: 1, b: 1, a: 1}
     - _GradBotLeftCol: {r: 0, g: 0, b: 1, a: 1}
     - _GradBotRightCol: {r: 0, g: 1, b: 0, a: 1}
     - _GradTopLeftCol: {r: 1, g: 0, b: 0, a: 1}
