@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groudLayerMask;
     
     [SerializeField] private float wallCheckDistance = 0.9f;
+    
+    [SerializeField] private ParticleSystem dustParticle;
 
     #region Ledge Settings
     [Header("--------Ledge settings--------")]
@@ -158,6 +160,13 @@ public class PlayerController : MonoBehaviour
             RaiseFriction(physicMaterial, maxFriction, frictionIncrement);
             rigidbody.AddForce(transform.forward.z * speed, 0, 0);
         }
+        
+        if(IsMoving.Value && IsGrounded.Value) {
+            if (dustParticle.isStopped) dustParticle.Play();
+        }
+        else {
+            if (dustParticle.isPlaying) dustParticle.Stop();
+        }
 
         if (rigidbody.useGravity != true) return;
 
@@ -191,8 +200,14 @@ public class PlayerController : MonoBehaviour
 
     #region Move
     public void Move(Vector2 vectorMove) {
-        if (vectorMove.x != 0) IsMoving.Value = true;
-        else IsMoving.Value = false;
+        if (vectorMove.x != 0)
+        {
+            IsMoving.Value = true;
+        }
+        else
+        {
+            IsMoving.Value = false;
+        }
 
         CheckBreakByPickax(vectorMove);
         
