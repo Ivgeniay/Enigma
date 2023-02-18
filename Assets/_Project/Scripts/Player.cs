@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
     {
         if (isDead) return;
 
-        Vector2 moveVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector2 moveVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         playerController.Move(moveVector);
         playerSound.Move(moveVector);
 

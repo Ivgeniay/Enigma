@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
@@ -22,6 +23,7 @@ public class PlayerAnimationController : MonoBehaviour
     private int isPush = Animator.StringToHash("IsPush");
     private int isDead = Animator.StringToHash("IsDead");
     private int isBrakePickax = Animator.StringToHash("IsBrakePickax");
+    private int isClimbLedge = Animator.StringToHash("IsClimbLedge");
     
     private int isClimb = Animator.StringToHash("IsClimb");
 
@@ -53,6 +55,7 @@ public class PlayerAnimationController : MonoBehaviour
         playerController.IsPush.OnValueChangeEvent += IsPushOnValueChangeHandler;
         playerController.IsDead.OnValueChangeEvent += IsDeadOnValueChangeHandler;
         playerController.IsBrakePickax.OnValueChangeEvent += IsBrakePickaxOnValueChangeHandler;
+        playerController.canClimbLedge.OnValueChangeEvent += IsCanClimbLedgeOnValueChangeHandler;
 
         playerController.OnJumpEvent += OnJumpHandler;
     }
@@ -70,6 +73,7 @@ public class PlayerAnimationController : MonoBehaviour
         playerController.IsPull.OnValueChangeEvent -= IsPullOnValueChangeHandler;
         playerController.IsDead.OnValueChangeEvent -= IsDeadOnValueChangeHandler;
         playerController.IsBrakePickax.OnValueChangeEvent -= IsBrakePickaxOnValueChangeHandler;
+        playerController.canClimbLedge.OnValueChangeEvent -= IsCanClimbLedgeOnValueChangeHandler;
 
         playerController.OnJumpEvent -= OnJumpHandler;
     }
@@ -103,6 +107,10 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetBool(isRope, newValue);
     private void IsInteractiveObjectOnValueChangeHandler(bool newValue) =>
         animator.SetBool(isInteractiveObject, newValue);
+    private void IsCanClimbLedgeOnValueChangeHandler(bool newValue) {
+        if (newValue)
+            animator.SetTrigger(isClimbLedge);
+    }
 
     #endregion
 
