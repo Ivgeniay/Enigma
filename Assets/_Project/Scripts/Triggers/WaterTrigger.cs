@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LayerChangeTrigger : MonoBehaviour
+public class WaterTrigger : MonoBehaviour
 {
+    private ParticleSystem.MinMaxGradient _defaultPSColor;
     private void OnTriggerEnter(Collider other)
     {
         var player = other.GetComponent<Player>();
@@ -12,6 +13,11 @@ public class LayerChangeTrigger : MonoBehaviour
         {
             var sp = player.GetComponentInChildren<SpriteRenderer>();
             sp.sortingOrder = 1;
+            
+            var ps = player.GetComponentInChildren<ParticleSystem>();
+            var main = ps.main;
+            _defaultPSColor = main.startColor;
+            main.startColor = new Color(0, 100, 102);
         }
     }
     
@@ -22,6 +28,10 @@ public class LayerChangeTrigger : MonoBehaviour
         {
             var sp = player.GetComponentInChildren<SpriteRenderer>();
             sp.sortingOrder = 3;
+            
+            var ps = player.GetComponentInChildren<ParticleSystem>();
+            var main = ps.main;
+            main.startColor = _defaultPSColor;
         }
     }
 }
