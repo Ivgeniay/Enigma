@@ -3,7 +3,8 @@
 public class CheckpointZoneTrigger : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other) {
-        Reloaded.Instance.SetRebirthPlace(transform.position);
+        if (other.GetComponent<Player>())
+            Reloaded.Instance.SetRebirthPlace(transform.position, this);
     }
 
 

@@ -13,9 +13,13 @@ public class CameraFollower : MonoBehaviour
     [SerializeField] private float minPosY;
     [SerializeField] private float maxPosY;
 
-    public void SetOffset(Vector3 offset) =>    
-        this.offset = offset;
-    
+    public void SetOffset(Vector3 offset) => this.offset = offset;
+    public void SetMinPosX(float minPosX) => this.minPosX = minPosX;
+    public void SetMaxPosX(float maxPosX) => this.maxPosX = maxPosX;
+    public void SetMinPosY(float minPosY) => this.minPosY = minPosY;
+    public void SetMaxPosY(float maxPosY) => this.maxPosY = maxPosY;
+
+
 
     private void Awake() {
         if (player == null)
