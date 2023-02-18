@@ -1,5 +1,67 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1779993006
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1779993007}
+  m_Layer: 0
+  m_Name: LedgeDetector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1779993007
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779993006}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.01, y: 4.06, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 42419475431822467}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1953735367
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1953735368}
+  m_Layer: 0
+  m_Name: LedgePosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1953735368
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953735367}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.08, y: 1.54, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 42419475431822467}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &42419475431822466
 GameObject:
   m_ObjectHideFlags: 0
@@ -35,6 +97,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 42419476144040101}
+  - {fileID: 1779993007}
+  - {fileID: 1953735368}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -80,7 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8faafef7811a7bf4688690414aa86c11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <deathImpulse>k__BackingField: 5
+  <deathImpulse>k__BackingField: 1e+10
 --- !u!114 &42419475431822470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,12 +162,17 @@ MonoBehaviour:
   <ImpulsRopeUpSlowdown>k__BackingField: 0.03
   <JumpForce>k__BackingField: 120
   <pullForce>k__BackingField: 0.6
-  <normal>k__BackingField: {x: 0, y: 0, z: 0}
+  <normal>k__BackingField: {x: 0, y: 1, z: 0}
   groudLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  wallCheckDistance: 0.4
+  ledgeClimbCheckOrigin: {fileID: 1779993007}
+  ledgeClimbPosition: {fileID: 1953735368}
+  ledgePosition1Offset: {x: 0.3, y: 0.05}
+  ledgePosition2Offset: {x: -0.05, y: 0.4}
   maxFriction: 0.5
-  frictionIncrement: 1
+  frictionIncrement: 3
   offsetCenter: {x: 0, y: 0.9, z: 0}
   offsetBounth: {x: 0.2, y: 0.2, z: 0.2}
 --- !u!82 &42419475431822473
@@ -249,6 +318,7 @@ GameObject:
   - component: {fileID: 42419476144040107}
   - component: {fileID: 42419476144040111}
   - component: {fileID: 42419476144040080}
+  - component: {fileID: 1730364273}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -311,7 +381,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 3
   m_Sprite: {fileID: 21300000, guid: ceff6314318d38f4da5486645d4bc06d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -427,5 +497,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 981aa82caa0aa7d42a364686def794e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1730364273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42419476144040100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf67c7e6075f4e9d94ce8e27be5c03e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
