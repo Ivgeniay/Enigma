@@ -170,7 +170,7 @@ MonoBehaviour:
   ledgeClimbCheckOrigin: {fileID: 1779993007}
   ledgeClimbPosition: {fileID: 1953735368}
   ledgePosition1Offset: {x: 0.3, y: 0.05}
-  ledgePosition2Offset: {x: -0.05, y: 0.4}
+  ledgePosition2Offset: {x: 0.05, y: 0.4}
   maxFriction: 0.5
   frictionIncrement: 3
   offsetCenter: {x: 0, y: 0.9, z: 0}
@@ -320,6 +320,7 @@ GameObject:
   - component: {fileID: 42419476144040080}
   - component: {fileID: 1730364273}
   - component: {fileID: 3992057495253082527}
+  - component: {fileID: 7180775375886909342}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -513,6 +514,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &3992057495253082527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42419476144040100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf67c7e6075f4e9d94ce8e27be5c03e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7180775375886909342
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
