@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class NecklaceSpawnTrigger : MonoBehaviour
 {
-    [SerializeField] private NecklaceDestroy necklaceDestroy;
+    [SerializeField] private GameObject necklaceDestroy;
     [SerializeField] private Vector3 offset;
     [SerializeField] private Camera camera;
 

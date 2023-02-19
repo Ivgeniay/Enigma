@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groudLayerMask;
     
     [SerializeField] private float wallCheckDistance = 0.9f;
+    [SerializeField] private float deathVelocity = 20f;
     
     //[SerializeField] private ParticleSystem dustParticle;
 
@@ -63,7 +64,6 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider collider;
     private Rigidbody rigidbody;
     private float speed;
-
 
     private bool canInteractiveObject;
     private bool isRope;
@@ -113,6 +113,10 @@ public class PlayerController : MonoBehaviour
         player = GetComponent<Player>();
 
         Subscribe();
+    }
+    private void Start()
+    {   //Костыль
+        Stand();
     }
 
     private void Update() {
@@ -170,8 +174,14 @@ public class PlayerController : MonoBehaviour
 
         if (rigidbody.useGravity != true) return;
 
-        if (rigidbody.velocity.y < -0.5 && IsGrounded.Value && !IsMoving.Value) IsSlide.Value = true;
-        else IsSlide.Value = false;
+        Debug.Log(rigidbody.velocity.y);
+        if (rigidbody.velocity.y <= deathVelocity && IsGrounded.Value)
+        {
+            player.Dead();
+        }
+
+        //if (rigidbody.velocity.y < -0.5 && IsGrounded.Value && !IsMoving.Value) IsSlide.Value = true;
+        //else IsSlide.Value = false;
     }
 
     private void Subscribe()
@@ -456,6 +466,24 @@ public class PlayerController : MonoBehaviour
     public void Dead() {
         IsDead.Value = true;
         Unsubscribe();
+        rigidbody.velocity = Vector3.zero;
+    }
+    public void DiasbleController() {
+        IsGrounded.Value = true;
+        IsMoving.Value = false;
+        IsWall.Value = false;
+        IsDead.Value = false;
+        IsPull.Value = false;
+        IsPush.Value = false;
+        IsClimb.Value = false;
+        IsSlide.Value = false;
+        IsMoving.Value = false;
+        IsGrounded.Value = false;
+        IsSquatDown.Value = false;
+        IsRopeTrigger.Value = false;
+        IsBrakePickax.Value = false;
+        IsInteractiveObject.Value = false;
+
         rigidbody.velocity = Vector3.zero;
     }
     public void UncheckDeadFlag() {
