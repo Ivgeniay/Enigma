@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     private PlayerController playerController;
     private PlayerSound playerSound;
 
+
     private bool isDead;
     public static bool isPickax { get; private set; }
     public static bool isNecllace { get; private set; }
@@ -40,6 +41,7 @@ public class Player : MonoBehaviour
 
         playerController.IsInteractiveButton(Input.GetKey(KeyCode.E));
         playerController.IsUpButtonDown(Input.GetKey(KeyCode.W));
+
     }
 
     private void OnCollisionEnter(Collision collision) {
@@ -91,13 +93,14 @@ public class Player : MonoBehaviour
     public void Dead()
     {
         isDead = true;
-        playerController.Dead();
+        if (playerController) playerController.Dead();
         playerController = null;
         OnPlayerDeadEvent?.Invoke();
     }
 
     internal void Controll(bool value) {
         if (value == false) {
+            playerController.DiasbleController();
             playerController = null;
         }
     }
