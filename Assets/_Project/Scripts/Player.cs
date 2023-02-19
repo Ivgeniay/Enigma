@@ -76,11 +76,18 @@ public class Player : MonoBehaviour
             if (_normal.y >= 1) _normal = new Vector3(_normal.x, 1f, _normal.z);
             playerController.SetNormal(_normal);
         }
+
+        var interactiveObj = collision.gameObject.GetComponent<IInteractive>();
+        if (interactiveObj != null)
+            playerController.CollisionInteractiveObject(true, interactiveObj);
     }
 
     private void OnCollisionExit(Collision collision) {
         if (playerController is not null) {
-            playerController.CollisionInteractiveObject(false, null);
+            var interactiveObj = collision.gameObject.GetComponent<IInteractive>();
+
+            if (interactiveObj != null)
+                playerController.CollisionInteractiveObject(false, null);
         }
     }
 
