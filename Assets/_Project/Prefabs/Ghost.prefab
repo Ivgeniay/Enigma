@@ -471,6 +471,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: CFXR Smoke Source 3D
       objectReference: {fileID: 0}
+    - target: {fileID: 7329581890669887889, guid: 61707ba3ab5d69a46ad5e5efb8fe936f,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 61707ba3ab5d69a46ad5e5efb8fe936f, type: 3}
 --- !u!4 &3454263519549689409 stripped

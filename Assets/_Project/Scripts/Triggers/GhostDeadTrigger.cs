@@ -1,19 +1,20 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class GhostDeadTrigger : MonoBehaviour
 {
-    private Ghost ghost;
-    private bool isActive = true;
+    private List<Ghost> ghosts = new();
+    //private bool isActive = true;
 
     public void SetGhost(Ghost ghost) => 
-        this.ghost = ghost;
+        this.ghosts.Add(ghost);
 
     private void OnTriggerEnter(Collider other) {
         var player = other.GetComponent<Player>();
-        if (player && isActive) {
-            if (ghost != null) {
-                isActive = false;
-                ghost.Died();
+
+        if (player) {
+            if (ghosts != null) {
+                ghosts.ForEach(el => el.Died());
             }
         }
         
