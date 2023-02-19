@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     
     [SerializeField] private float wallCheckDistance = 0.9f;
     
-    [SerializeField] private ParticleSystem dustParticle;
+    //[SerializeField] private ParticleSystem dustParticle;
 
     #region Ledge Settings
     [Header("--------Ledge settings--------")]
@@ -161,12 +161,12 @@ public class PlayerController : MonoBehaviour
             rigidbody.AddForce(transform.forward.z * speed, 0, 0);
         }
         
-        if(IsMoving.Value && IsGrounded.Value) {
-            if (dustParticle.isStopped) dustParticle.Play();
-        }
-        else {
-            if (dustParticle.isPlaying) dustParticle.Stop();
-        }
+        //if(IsMoving.Value && IsGrounded.Value) {
+        //    if (dustParticle.isStopped) dustParticle.Play();
+        //}
+        //else {
+        //    if (dustParticle.isPlaying) dustParticle.Stop();
+        //}
 
         if (rigidbody.useGravity != true) return;
 
@@ -429,7 +429,7 @@ public class PlayerController : MonoBehaviour
     #region BrakeByPickax
     private void CheckBreakByPickax(Vector2 move)
     {
-        if (player.isPickax == false) return;
+        if (Player.isPickax == false) return;
 
         var transformDirection = transform.forward.z;
         var moveNornalize = move.normalized.x;

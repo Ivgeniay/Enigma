@@ -12,7 +12,8 @@ public class Player : MonoBehaviour
     private PlayerSound playerSound;
 
     private bool isDead;
-    public bool isPickax { get; private set; }
+    public static bool isPickax { get; private set; }
+    public static bool isNecllace { get; private set; }
 
     private void Awake() {
         Reloaded.Instance.Instantiate(this);
@@ -24,6 +25,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (isDead) return;
+        if (!playerController) return;
 
         Vector2 moveVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         playerController.Move(moveVector);
@@ -83,11 +85,20 @@ public class Player : MonoBehaviour
     public void PickPickax() =>
         isPickax= true;
 
+    public void PickNecllace() =>
+        isNecllace = true;
+
     public void Dead()
     {
         isDead = true;
         playerController.Dead();
         playerController = null;
         OnPlayerDeadEvent?.Invoke();
+    }
+
+    internal void Controll(bool value) {
+        if (value == false) {
+            playerController = null;
+        }
     }
 }
