@@ -25,6 +25,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (isDead) return;
+        if (!playerController) return;
 
         Vector2 moveVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         playerController.Move(moveVector);
@@ -95,4 +96,9 @@ public class Player : MonoBehaviour
         OnPlayerDeadEvent?.Invoke();
     }
 
+    internal void Controll(bool value) {
+        if (value == false) {
+            playerController = null;
+        }
+    }
 }
